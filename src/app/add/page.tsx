@@ -173,9 +173,11 @@ const AddPage = () => {
 									<TextField name='category' label="Category" fullWidth margin='dense' size='small' select defaultValue={''}>
 										<MenuItem value={'electronicos'}>Electronicos</MenuItem>
 										<MenuItem value={'muebles'}>Muebles</MenuItem>
+										<MenuItem value={'cocina'}>Muebles</MenuItem>
 										<MenuItem value={'joyeria'}>Joyería</MenuItem>
 										<MenuItem value={'ropa'}>Ropa</MenuItem>
 										<MenuItem value={'decoraciones'}>Decoraciones</MenuItem>
+										<MenuItem value={'herramientas'}>Decoraciones</MenuItem>
 										<MenuItem value={'miscelaneos'}>Miscelaneos</MenuItem>
 									</TextField>
 									<TextField name='quantity' label="Quantity" type="number" fullWidth margin='dense' size='small' defaultValue={1}/>
