@@ -25,7 +25,7 @@ export default function UsersPage() {
 							id="select-user"
 							value={user}
 							label="User"
-							onChange={(e) => {setUser(e.target.value as string); setIsComplete(user ? true : false)}}
+							onChange={(e) => {setUser(e.target.value as string); setIsComplete(true)}}
 							fullWidth
 						>
 							<MenuItem value={'guillermo'}>Paps</MenuItem>
