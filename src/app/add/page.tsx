@@ -1,8 +1,8 @@
 'use client'
 
-import { Box, Button, Card, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, List, ListItem, ListItemText, ListSubheader, TextField, Typography } from '@mui/material';
+import { Box, Button, Card, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, List, ListItem, ListItemText, ListSubheader, MenuItem, TextField, Typography } from '@mui/material';
 import JSZip from 'jszip';
-import React, { ChangeEvent, useState } from 'react'
+import React, { FormEvent, useState } from 'react'
 
 interface IItem {
 	id: string;
@@ -12,75 +12,41 @@ interface IItem {
 	serial_numbers: string[];
 	estimated_value: number;
 	initial_value: number;
+	value_link: string;
 	notes: string;
 	images: File[];
-}
-
-type NewItemFormState = {
-    name: string;
-    category: string;
-    quantity: number | string;
-    serial_numbers: string[];
-    estimated_value: number | string;
-    initial_value: number | string;
-    notes: string;
-    images: FileList | null;
 }
 
 const AddPage = () => {
 	const [items, setItems] = useState<IItem[]>([]);
 	const [dialogOpen, setDialogOpen] = useState(false);
 
-	const initialItemState: NewItemFormState = {
-		name: '',
-		category: '',
-		quantity: 1,
-		serial_numbers: [],
-		estimated_value: 0,
-		initial_value: 0,
-		notes: '',
-		images: null,
-	};
+	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
+        event.preventDefault(); // Prevent default form submission
 
-	const [newItem, setNewItem] = useState<NewItemFormState>(initialItemState);
+        const formData = new FormData(event.currentTarget); // Get form data
 
-	const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const { name, value, type } = e.target;
+        const name = formData.get('name') as string;
+        if (!name) return; // Don't add item if name is missing
 
-        if (e.target instanceof HTMLInputElement && e.target.files) {
-            setNewItem({ ...newItem, images: e.target.files });
-            return;
-        }
-
-        // For number inputs, only update if the value is a valid number format or empty
-        if (type === 'number' && value !== '' && !/^\d*\.?\d*$/.test(value)) {
-           return; // Prevents invalid characters in number fields
-        }
-
-        setNewItem({
-            ...newItem,
-            [name]: value,
-        });
-    };
-
-	const handleAddItem = () => {
-        if (!newItem.name) return;
+        // Get all files from the input
+        const images = formData.getAll('images') as File[];
 
         const itemToAdd: IItem = {
-            id: `${Date.now()}-${newItem.name}`, // Assign a unique ID
-            name: newItem.name,
-            category: newItem.category,
-            quantity: Number(newItem.quantity) || 0,
-            serial_numbers: newItem.serial_numbers,
-            estimated_value: Number(newItem.estimated_value) || 0,
-            initial_value: Number(newItem.initial_value) || 0,
-            notes: newItem.notes,
-            images: newItem.images ? Array.from(newItem.images) : [],
+            id: `${Date.now()}-${name}`,
+            name: name,
+            category: formData.get('category') as string || 'N/A',
+            quantity: Number(formData.get('quantity')) || 0,
+            serial_numbers: (formData.get('serial_numbers') as string)?.split(',').map(s => s.trim()).filter(Boolean) || [],
+            initial_value: Number(formData.get('initial_value')) || 0,
+            estimated_value: Number(formData.get('estimated_value')) || 0,
+            value_link: formData.get('value_link') as string || '',
+            notes: formData.get('notes') as string || '',
+            images: images,
         };
 
         setItems(prevItems => [...prevItems, itemToAdd]);
-        setNewItem(initialItemState); // Reset form using the initial state constant
-        setDialogOpen(false);
+        setDialogOpen(false); // Close the dialog after adding
     };
 
 	const handleDeleteItem = (id: string) => {
@@ -98,9 +64,15 @@ const AddPage = () => {
             const folderName = `${index + 1}_${item.name.replace(/\s+/g, '_')}`;
             const folder = zip.folder(folderName);
 
-            const textContent = `name: ${item.name}\ncategory: ${item.category}\nquantity: ${item.quantity}\ninitial_value: $${item.initial_value}\nestimated_value: $${item.estimated_value}\nnotes: ${item.notes}`;
+            const textContent = `id: ${item.id}\nname: ${item.name}\ncategory: ${item.category}\nquantity: ${item.quantity}\nserial_numbers: ${item.serial_numbers.join(', ')}\ninitial_value: $${item.initial_value}\nestimated_value: $${item.estimated_value}\nvalue_link: $${item.value_link}\nnotes: ${item.notes}`;
 
             folder?.file('info.txt', textContent);
+
+			const metadata = {
+				...item,
+				images: item.images.map((img, i) => `image_${i + 1}${img.name.slice(img.name.lastIndexOf('.'))}`),
+			};
+			folder?.file('data.json', JSON.stringify(metadata, null, 4));
 
             item.images.forEach((image, imgIndex) => {
                 const ext = image.name.slice(image.name.lastIndexOf('.')) || '.jpg';
@@ -155,75 +127,33 @@ const AddPage = () => {
 
 				{/* Dialog for adding item */}
 				<Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} fullWidth>
-				<DialogTitle>Add New Item</DialogTitle>
-				<DialogContent dividers>
-					<TextField
-						label="Name"
-						name='name'
-						value={newItem.name}
-						onChange={handleChange}
-						fullWidth
-						margin='dense'
-					/>
-					<TextField
-						label="Category"
-						name='category'
-						value={newItem.category}
-						onChange={handleChange}
-						fullWidth
-						margin='dense'
-					/>
-					<TextField
-						label="Initial Value"
-						name='initial_value'
-						type="number"
-						value={newItem.initial_value}
-						onChange={handleChange}
-						fullWidth
-						margin='dense'
-					/>
-					<TextField
-						label="Estimated Value"
-						name='estimated_value'
-						type="number"
-						value={newItem.estimated_value}
-						onChange={handleChange}
-						fullWidth
-						margin='dense'
-					/>
-					<TextField
-						label="Quantity"
-						name='quantity'
-						type="number"
-						value={newItem.quantity}
-						onChange={handleChange}
-						fullWidth
-						margin='dense'
-					/>
-					<TextField
-						label="Notes"
-						name='notes'
-						value={newItem.notes}
-						onChange={handleChange}
-						fullWidth
-						margin="dense"
-						multiline
-						rows={3}
-					/>
-					<Box mt={2}>
-						<input
-							type="file"
-							name='images'
-							multiple
-							accept="image/*"
-							onChange={handleChange}
-						/>
-					</Box>
-				</DialogContent>
-				<DialogActions>
-					<Button onClick={() => setDialogOpen(false)}>Cancel</Button>
-					<Button variant="contained" onClick={handleAddItem}>Add</Button>
-				</DialogActions>
+					<form id="add-item-form" onSubmit={handleSubmit}>
+						<DialogTitle>Add New Item</DialogTitle>
+						<DialogContent dividers>
+							<TextField name='name' label="Name" fullWidth margin='dense' size='small'/>
+							<TextField name='category' label="Category" fullWidth margin='dense' size='small' select defaultValue={''}>
+								<MenuItem value={'electronicos'}>electronicos</MenuItem>
+								<MenuItem value={'muebles'}>Muebles</MenuItem>
+								<MenuItem value={'joyeria'}>Joyería</MenuItem>
+								<MenuItem value={'muebles'}>Muebles</MenuItem>
+							</TextField>
+							<TextField name='quantity' label="Quantity" type="number" fullWidth margin='dense' size='small' defaultValue={1}/>
+							<TextField name='serial_numbers' label='Serial Numbers (x,y)' fullWidth margin='dense' size='small'/>
+							<Box sx={{display:'flex', gap:1}}>
+								<TextField name='initial_value' label="Initial Value" type="number" fullWidth margin='dense' size='small'/>
+								<TextField name='estimated_value' label="Estimated Value" type="number" fullWidth margin='dense' size='small'/>
+							</Box>
+							<TextField name='value_link' label="Value Link" fullWidth margin='dense' size='small'/>
+							<TextField name='notes' label="Notes" fullWidth margin="dense" multiline rows={3} size='small'/>
+							<Box mt={2} sx={{display:'flex'}}>
+								<input name='images' type="file" multiple accept="image/*" capture="environment"/>
+							</Box>			
+						</DialogContent>
+						<DialogActions>
+							<Button onClick={() => setDialogOpen(false)}>Cancel</Button>
+							<Button variant="contained" type='submit' form="add-item-form">Add</Button>
+						</DialogActions>
+					</form>
 				</Dialog>
 			</Card>
 		</Container>
