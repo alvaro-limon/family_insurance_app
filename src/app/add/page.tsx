@@ -2,7 +2,8 @@
 
 import { Box, Button, Card, Container, Dialog, DialogActions, DialogContent, DialogTitle, Grid, List, ListItem, ListItemText, ListSubheader, MenuItem, TextField, Typography } from '@mui/material';
 import JSZip from 'jszip';
-import React, { FormEvent, useState } from 'react'
+import Image from 'next/image';
+import React, { FormEvent, useRef, useState } from 'react'
 
 interface IItem {
 	id: string;
@@ -26,6 +27,10 @@ const AddPage = () => {
 	const [items, setItems] = useState<IItem[]>([]);
 	const [dialogOpen, setDialogOpen] = useState(false);
 
+	// Image Selection
+	const fileInputRef = useRef<HTMLInputElement>(null);
+	const [selectedImages, setSelectedImages] = useState<File[]>([]);
+
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault(); // Prevent default form submission
 
@@ -33,9 +38,6 @@ const AddPage = () => {
 
         const name = formData.get('name') as string;
         if (!name) return; // Don't add item if name is missing
-
-        // Get all files from the input
-        const images = (formData.getAll('images') as File[]).filter(file => file && file.name && file.size > 0);
 
         const itemToAdd: IItem = {
             id: `${Date.now()}-${name}`,
@@ -48,7 +50,7 @@ const AddPage = () => {
             estimated_value: Number(formData.get('estimated_value')) || 0,
             value_link: formData.get('value_link') as string || '',
             notes: formData.get('notes') as string || '',
-            images: images,
+            images: selectedImages,
         };
 
         setItems(prevItems => [...prevItems, itemToAdd]);
@@ -171,7 +173,8 @@ const AddPage = () => {
 										<MenuItem value={'electronicos'}>electronicos</MenuItem>
 										<MenuItem value={'muebles'}>Muebles</MenuItem>
 										<MenuItem value={'joyeria'}>Joyería</MenuItem>
-										<MenuItem value={'muebles'}>Muebles</MenuItem>
+										<MenuItem value={'ropa'}>Ropa</MenuItem>
+										<MenuItem value={'ropa'}>Ropa</MenuItem>
 									</TextField>
 									<TextField name='quantity' label="Quantity" type="number" fullWidth margin='dense' size='small' defaultValue={1}/>
 									<TextField name='serial_numbers' label='Serial Numbers (x,y)' fullWidth margin='dense' size='small'/>
@@ -181,9 +184,35 @@ const AddPage = () => {
 									</Box>
 									<TextField name='value_link' label="Value Link" fullWidth margin='dense' size='small'/>
 									<TextField name='notes' label="Notes" fullWidth margin="dense" multiline rows={3} size='small'/>
-									<Box mt={2} sx={{display:'flex'}}>
-										<input name='images' type="file" multiple accept="image/*" capture="environment"/>
-									</Box>			
+									<input
+										ref={fileInputRef}
+										type="file"
+										accept="image/*"
+										capture="environment"
+										style={{ display: 'none' }}
+										onChange={(e) => {
+											const file = e.target.files?.[0];
+											if (file) {
+											setSelectedImages((prev) => [...prev, file]);
+											}
+											e.target.value = ''; // Reset so user can take the same photo again if needed
+										}}
+									/>
+									<Button onClick={() => fileInputRef.current?.click()} variant="outlined" sx={{mt:1}}>
+										Take Picture
+									</Button>
+									<Box display="flex" flexWrap="wrap" gap={1} mt={2}>
+										{selectedImages.map((file, i) => (
+											<Image
+												key={i}
+												src={URL.createObjectURL(file)}
+												alt={`Preview ${i}`}
+												width={50}
+												height={50}
+												objectFit='cover'
+											/>
+										))}
+									</Box>
 								</DialogContent>
 								<DialogActions>
 									<Button onClick={() => setDialogOpen(false)}>Cancel</Button>
