@@ -170,11 +170,12 @@ const AddPage = () => {
 								<DialogContent dividers>
 									<TextField name='name' label="Name" fullWidth margin='dense' size='small'/>
 									<TextField name='category' label="Category" fullWidth margin='dense' size='small' select defaultValue={''}>
-										<MenuItem value={'electronicos'}>electronicos</MenuItem>
+										<MenuItem value={'electronicos'}>Electronicos</MenuItem>
 										<MenuItem value={'muebles'}>Muebles</MenuItem>
 										<MenuItem value={'joyeria'}>Joyería</MenuItem>
 										<MenuItem value={'ropa'}>Ropa</MenuItem>
-										<MenuItem value={'ropa'}>Ropa</MenuItem>
+										<MenuItem value={'decoraciones'}>Decoraciones</MenuItem>
+										<MenuItem value={'miscelaneos'}>Miscelaneos</MenuItem>
 									</TextField>
 									<TextField name='quantity' label="Quantity" type="number" fullWidth margin='dense' size='small' defaultValue={1}/>
 									<TextField name='serial_numbers' label='Serial Numbers (x,y)' fullWidth margin='dense' size='small'/>
