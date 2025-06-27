@@ -54,6 +54,7 @@ const AddPage = () => {
         };
 
         setItems(prevItems => [...prevItems, itemToAdd]);
+		setSelectedImages([]);
         setDialogOpen(false); // Close the dialog after adding
     };
 
