@@ -16,7 +16,7 @@ export default function Home() {
 						</Box>
 					</Grid>
 					<Grid>
-						<Button variant="contained" fullWidth onClick={() => router.push('/users')}>Start</Button>
+						<Button variant="contained" fullWidth onClick={() => router.push('/add')}>Start</Button>
 					</Grid>
 				</Grid>
 			</Card>
