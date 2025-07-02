@@ -183,8 +183,8 @@ const AddPage = () => {
 									<TextField name='quantity' label="Quantity" type="number" fullWidth margin='dense' size='small' defaultValue={1}/>
 									<TextField name='serial_numbers' label='Serial Numbers (x,y)' fullWidth margin='dense' size='small'/>
 									<Box sx={{display:'flex', gap:1}}>
-										<TextField name='initial_value' label="Initial Value" type="number" fullWidth margin='dense' size='small'/>
-										<TextField name='estimated_value' label="Estimated Value" type="number" fullWidth margin='dense' size='small'/>
+										<TextField name='initial_value' label="Initial Value" type="number" fullWidth margin='dense' size='small' slotProps={{input:{inputProps:{step:0.01}}}}/>
+										<TextField name='estimated_value' label="Estimated Value" type="number" fullWidth margin='dense' size='small' slotProps={{input:{inputProps:{step:0.01}}}}/>
 									</Box>
 									<TextField name='value_link' label="Value Link" fullWidth margin='dense' size='small'/>
 									<TextField name='notes' label="Notes" fullWidth margin="dense" multiline rows={3} size='small'/>
