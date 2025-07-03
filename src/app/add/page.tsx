@@ -225,7 +225,6 @@ const AddPage = () => {
 										style={{ display: 'none' }}
 										onChange={(e) => {
 											addFiles(e.target.files, 2)
-											e.target.value = ''; // Reset so user can take the same photo again if needed
 										}}
 									/>
 									<Box sx={{display:'flex', gap:1}}>
