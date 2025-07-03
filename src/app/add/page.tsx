@@ -86,15 +86,15 @@ const AddPage = () => {
     };
 
 	const handleDownloadZip = async () => {
-        const zip = new JSZip();
+		const zip = new JSZip();
 
-        items.forEach((item, index) => {
-            const folderName = `${index + 1}_${item.name.replace(/\s+/g, '_')}`;
-            const folder = zip.folder(folderName);
+		await Promise.all(items.map(async (item, index) => {
+			const folderName = `${index + 1}_${item.name.replace(/\s+/g, '_')}`;
+			const folder = zip.folder(folderName);
+			
+			const textContent = `id: ${item.id}\nname: ${item.name}\nuser: ${item.user}\ncategory: ${item.category}\nquantity: ${item.quantity}\nserial_numbers: ${item.serial_numbers.join(', ')}\ninitial_value: $${item.initial_value}\nestimated_value: $${item.estimated_value}\nvalue_link: $${item.value_link}\nnotes: ${item.notes}`;
 
-            const textContent = `id: ${item.id}\nname: ${item.name}\nuser: ${item.user}\ncategory: ${item.category}\nquantity: ${item.quantity}\nserial_numbers: ${item.serial_numbers.join(', ')}\ninitial_value: $${item.initial_value}\nestimated_value: $${item.estimated_value}\nvalue_link: $${item.value_link}\nnotes: ${item.notes}`;
-
-            folder?.file('info.txt', textContent);
+			folder?.file('info.txt', textContent);
 
 			const metadata = {
 				...item,
@@ -102,23 +102,23 @@ const AddPage = () => {
 			};
 			folder?.file('data.json', JSON.stringify(metadata, null, 4));
 
-			item.images.forEach((image, imgIndex) => {
-				folder?.file(`image_${imgIndex + 1}_${item.name.replace(/\s+/g, '_')}.jpg`, image);
-			});
-        });
+			// Await all image reads
+			await Promise.all(item.images.map(async (image, imgIndex) => {
+				const arrayBuffer = await image.arrayBuffer();
+				folder?.file(`image_${imgIndex + 1}_${item.name.replace(/\s+/g, '_')}.jpg`, arrayBuffer);
+			}));
+		}));
 
-        const blob = await zip.generateAsync({ type: 'blob' });
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `items_${Date.now()}.zip`;
-        document.body.appendChild(link);
-        link.click();
-
-        // Clean up by revoking the object URL and removing the link
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-    };
+		const blob = await zip.generateAsync({ type: 'blob' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.download = `items_${Date.now()}.zip`;
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	};
 
 	return (
 		<Container maxWidth='sm' sx={{height:'100vh', display:'flex', justifyContent:'center', alignItems:'center'}}>
