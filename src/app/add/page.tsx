@@ -30,7 +30,22 @@ const AddPage = () => {
 	// Image Selection
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const fileInputRef2 = useRef<HTMLInputElement>(null);
-	const [selectedImages, setSelectedImages] = useState<File[]>([]);
+	const [selectedImages, setSelectedImages] = useState<{ file: File; url: string }[]>([]);
+	const [selectedImages2, setSelectedImages2] = useState<{ file: File; url: string }[]>([]);
+
+	const addFiles = (files: FileList | null, num: number) => {
+		if (!files) return;
+		const newFiles = Array.from(files).map(file => ({
+			file,
+			url: URL.createObjectURL(file),
+		}));
+		if (num == 1) {
+			setSelectedImages(prev => [...prev, ...newFiles]);
+		}
+		else {
+			setSelectedImages2(prev => [...prev, ...newFiles]);
+		}
+	};
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault(); // Prevent default form submission
@@ -51,11 +66,14 @@ const AddPage = () => {
             estimated_value: Number(formData.get('estimated_value')) || 0,
             value_link: formData.get('value_link') as string || '',
             notes: formData.get('notes') as string || '',
-            images: selectedImages,
+            images: [...selectedImages.map(img => img.file), ...selectedImages2.map(img => img.file)],
         };
 
         setItems(prevItems => [...prevItems, itemToAdd]);
+		selectedImages.forEach(img => URL.revokeObjectURL(img.url));
+		selectedImages2.forEach(img => URL.revokeObjectURL(img.url));
 		setSelectedImages([]);
+		setSelectedImages2([]);
         setDialogOpen(false); // Close the dialog after adding
     };
 
@@ -196,10 +214,7 @@ const AddPage = () => {
 										capture="environment"
 										style={{ display: 'none' }}
 										onChange={(e) => {
-											const file = e.target.files?.[0];
-											if (file) {
-												setSelectedImages((prev) => [...prev, file]);
-											}
+											addFiles(e.target.files, 1)
 											e.target.value = ''; // Reset so user can take the same photo again if needed
 										}}
 									/>
@@ -209,10 +224,7 @@ const AddPage = () => {
 										accept="image/*"
 										style={{ display: 'none' }}
 										onChange={(e) => {
-											const file = e.target.files?.[0];
-											if (file) {
-												setSelectedImages((prev) => [...prev, file]);
-											}
+											addFiles(e.target.files, 2)
 											e.target.value = ''; // Reset so user can take the same photo again if needed
 										}}
 									/>
@@ -228,7 +240,19 @@ const AddPage = () => {
 										{selectedImages.map((file, i) => (
 											<Image
 												key={i}
-												src={URL.createObjectURL(file)}
+												src={file.url}
+												alt={`Preview ${i}`}
+												width={50}
+												height={50}
+												objectFit='cover'
+											/>
+										))}
+									</Box>
+									<Box display="flex" flexWrap="wrap" gap={1} mt={2}>
+										{selectedImages2.map((file, i) => (
+											<Image
+												key={i}
+												src={file.url}
 												alt={`Preview ${i}`}
 												width={50}
 												height={50}
