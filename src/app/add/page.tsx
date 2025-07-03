@@ -29,6 +29,7 @@ const AddPage = () => {
 
 	// Image Selection
 	const fileInputRef = useRef<HTMLInputElement>(null);
+	const fileInputRef2 = useRef<HTMLInputElement>(null);
 	const [selectedImages, setSelectedImages] = useState<File[]>([]);
 
 	const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
@@ -202,9 +203,27 @@ const AddPage = () => {
 											e.target.value = ''; // Reset so user can take the same photo again if needed
 										}}
 									/>
+									<input
+										ref={fileInputRef2}
+										type="file"
+										accept="image/*"
+										style={{ display: 'none' }}
+										onChange={(e) => {
+											const file = e.target.files?.[0];
+											if (file) {
+											setSelectedImages((prev) => [...prev, file]);
+											}
+											e.target.value = ''; // Reset so user can take the same photo again if needed
+										}}
+									/>
+									<Box sx={{display:'flex', gap:1}}>
 									<Button onClick={() => fileInputRef.current?.click()} variant="outlined" sx={{mt:1}}>
 										Take Picture
 									</Button>
+									<Button onClick={() => fileInputRef2.current?.click()} variant="outlined" sx={{mt:1}}>
+										Upload Picture
+									</Button>
+									</Box>
 									<Box display="flex" flexWrap="wrap" gap={1} mt={2}>
 										{selectedImages.map((file, i) => (
 											<Image
