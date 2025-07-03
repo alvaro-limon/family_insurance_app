@@ -198,7 +198,7 @@ const AddPage = () => {
 										onChange={(e) => {
 											const file = e.target.files?.[0];
 											if (file) {
-											setSelectedImages((prev) => [...prev, file]);
+												setSelectedImages((prev) => [...prev, file]);
 											}
 											e.target.value = ''; // Reset so user can take the same photo again if needed
 										}}
@@ -211,7 +211,7 @@ const AddPage = () => {
 										onChange={(e) => {
 											const file = e.target.files?.[0];
 											if (file) {
-											setSelectedImages((prev) => [...prev, file]);
+												setSelectedImages((prev) => [...prev, file]);
 											}
 											e.target.value = ''; // Reset so user can take the same photo again if needed
 										}}
